@@ -1,9 +1,11 @@
 
+#Just tests some gl drawing and showing where the cursor is as such.
+
 load("get_c.j")
 load("sdl_bad_utils/init_stuff.j")
 
-load("gl/gl.j")
-load("gl/gl_util.j")
+load("autoffi/gl.j")
+load("gl_util.j")
 
 load("sdl_bad_utils/sdl_event.j")
 
@@ -29,7 +31,6 @@ function run_this ()
       glvertex(mx(),my()+0.1)
     end
     finalize_draw()
-    while poll_event()!=0
-    end
+    flush_events()
   end
 end

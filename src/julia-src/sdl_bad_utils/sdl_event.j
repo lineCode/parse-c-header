@@ -7,6 +7,11 @@ draw_funs_lib = dlopen("/home/jasper/proj/julia/julia_c/sdl_bad_utils/sdl_event.
 @get_c_fun draw_funs_lib auto mouse_y()::Int32
 @get_c_fun draw_funs_lib auto poll_event()::Int32
 
+function flush_events()
+  while poll_event() != SDL_EVENTS_DONE
+  end
+end
+
 #@get_c_fun_list draw_funs_lib begin
 #  mouse_x()::Int32
 #  mouse_y()::Int32

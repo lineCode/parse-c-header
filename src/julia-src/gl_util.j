@@ -105,20 +105,21 @@ function frame_from(range::(Number,Number,Number,Number))
 end
 
 #Rectangle vertices (in QUADS, LINE_LOOP-able style)
-function quad_vertices(fx::Number,fy::Number,tx::Number,ty::Number)
+function rect_vertices(fx::Number,fy::Number,tx::Number,ty::Number)
   glvertex(fx,fy)
   glvertex(fx,ty)
   glvertex(tx,ty)
   glvertex(tx,fy)
 end
-function quad_vertices(range::(Number,Number,Number,Number))
+function rect_vertices(range::(Number,Number,Number,Number))
   fx,fy,tx,ty = range
-  quad_vertices(fx,fy,tx,ty)
+  rect_vertices(fx,fy,tx,ty)
 end
-quad_vertices(fr::Vector, to::Vector) = 
-    quad_vertices(fr[1],fr[2], to[1],to[2])
+rect_vertices(fr::Vector, to::Vector) = 
+    rect_vertices(fr[1],fr[2], to[1],to[2])
 
-vertices_around(x::Number,y::Number, r::Number) = 
-    quad_vertices(x-r,y-r, x+r, y+r)
+vertices_rect_around(x::Number,y::Number, r::Number) = 
+    rect_vertices(x-r,y-r, x+r, y+r)
 
-vertices_around(pos::Vector, r::Number) = vertices_around(pos[1],pos[2],r)
+vertices_rect_around(pos::Vector, r::Number) = 
+   vertices_rect_around(pos[1],pos[2],r)
