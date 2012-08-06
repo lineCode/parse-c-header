@@ -23,7 +23,7 @@ macro get_c_fun (dlopen_lib, to_name, from_fun)
   assert( from_fun.args[1].head == :call, 
       "Not sure i may define functions on $(from_fun.args[1].head)" )
   c_name = from_fun.args[1].args[1]
-  if to_name == :auto #The `auto` feature.
+  if to_name == :auto #Just use the C function name.
     to_name = c_name
   end
   arguments = #Whine about stuff done wrong. Convert arguments if needed.
@@ -42,38 +42,43 @@ macro get_c_fun (dlopen_lib, to_name, from_fun)
   return_type = from_fun.args[2]
   input_types = map(function (arg) arg.args[2] end, arguments)
 # Construct the result.
-  return Expr(:function,
+  ret= Expr(:function,
               {Expr(:call, cat(1,{to_name},argument_names),Any),
                Expr(:ccall, 
-                    cat(1, {:(dlsym($dlopen_lib, 
+                    cat(1, {:(dlsym($dlopen_lib, #Really needs to be a quote.
                                     $(Expr(:quote,{c_name},Any)))), 
                             return_type, Expr(:tuple,input_types,Any)},
                         argument_names), Any)}, Any)
+  return ret
 end
 
+#TODO magic gensym replacing dlopen_lib... how..
 #Get_c fun, but in such a way that doing many doesnt require that much 
-# repetition. #TODO problem
+# repetition. 
 macro get_c_fun_list (dlopen_lib, functions)
   assert( functions.head == :block, 
          "Not a block(which is begin..end) instead a: $(functions.head) " )
-  lib = gensym()
-  quote $lib = $dlopen_lib
-      $(Expr(:block,
-             map(function(fun) #TODO filter out non-Expr stuff
-                   if isa(fun,Expr) #Ask them why there is a LineNumberNode?
-                     if fun.head==_of_type_sym
-                       Expr(:macrocall, {:get_c_fun,lib,:auto,fun}, Any)
-                     elseif fun.head== :cell1d
-                       Expr(:macrocall, {get_c_fun,lib,fun.args[1],
-                                         fun,args[2]}, Any)
-                     else
-                       assert(fun.head == :line,
-                         "Found some weird shit in macro, giving an error,\
- because otherwise this could be more nasty.\
- (Any commas etc that don't belong?)")
-                     end
-                   end
-                 end, functions.args),Any))
+  lib = dlopen_lib
+  assert( isa(lib, Symbol) )
+  function handle (fun)
+    if isa(fun,Expr) #Ask them why there is a LineNumberNode?
+      if is(fun.head, _of_type_sym)
+        Expr(:macrocall, {:get_c_fun,lib,:auto,fun}, Any)
+      else if is(fun.head, :cell1d)
+        Expr(:macrocall, {get_c_fun,lib,fun.args[1],
+                          fun,args[2]}, Any)
+        else #TODO warranted warning, better?
+          assert( is(fun.head, :line),"Found some weird shit in macro, giving\
+ an error, because otherwise this could be more nasty. (Any commas etc that\
+  don't belong?)")
+        end
+      end
+    end
+  end
+  blocklist = map(handle, functions.args)
+  quote
+    $lib = $dlopen_lib
+    $(Expr(:block, blocklist,Any))
   end
 end
 

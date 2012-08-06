@@ -1,5 +1,5 @@
 ;;
-;;  Copyright (C) 11-07-2012 Jasper den Ouden.
+;;  Copyright (C) 05-08-2012 Jasper den Ouden.
 ;;
 ;;  This is free software: you can redistribute it and/or modify
 ;;  it under the terms of the GNU General Public License as published
@@ -24,8 +24,8 @@
   "Tokenize in 'c-like' style, also makes it an m-expr."
   (tokenize input :stop (if one-expr ";" "") 
 	    :ignore-start "#" :ignore-end (format nil "~%")
-	    :white (format nil " ~T") ;Newlines are special to keep track.
-	    :singlets (format nil "=+*-/%&^$#!@?><\'\:,~%;")
+	    :white (format nil " ~T~%")
+	    :singlets (format nil "=+*-/%&^$#!@?><\'\:,;")
 	    :open "({[" :close ")}]" :keep-ignore-p :comment))
   
 (defun type-var-handler (input)
@@ -158,10 +158,20 @@
 	(values (cadr cdr) (cddr cdr)))
     (assert (and (listp enum-list) (eql (car enum-list) #\{) t)  nil "~s" cdr)
     (labels
-	((enum (list)
+	((partial-detokenize (list)
+	   "Attach some bits back together.
+ (A sign that this code is rather bad.."
+	   (when list
+	     (case (car list)
+	       ((#\+ #\-) (partial-detokenize
+			   (cons (concat (list(car list)) (cadr list))
+				 (cddr list))))
+	       (t         (cons (car list) 
+				(partial-detokenize (cdr list)))))))
+	 (enum (list)
 	   "Parses it recursively."
-	   (destructuring-bind (first &optional second third fourth &rest rest)
-	       list
+	   (destructuring-bind (first &optional second third fourth
+				      &rest rest) list
 	     (case second
 	       (#\, (assert third nil "Comma, but nothing after.")
 		    (cons first (enum (cddr list))))
@@ -171,10 +181,10 @@
 		    (assert (or (not fourth) rest) nil
 			    "Comma, but nothing afterward.")
 		    (cons (list first third) (when rest (enum rest))))
-	       (t   (if second (error "~s" second) 
+	       (t   (if second (error "~s" list) 
 		       (list first)))))))
       `((:enum ,(unless (listp (car cdr)) (car cdr))
-	       ,@(enum (cdr enum-list))) ,@rest))))
+	       ,@(enum(partial-detokenize (cdr enum-list)))) ,@rest))))
 
 (defun parse-c-args (list)
   (assert (eql (car list) #\() nil "Argument list not delimited by () but\

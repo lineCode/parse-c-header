@@ -1,5 +1,5 @@
 ;;
-;;  Copyright (C) 11-07-2012 Jasper den Ouden.
+;;  Copyright (C) 05-08-2012 Jasper den Ouden.
 ;;
 ;;  This is free software: you can redistribute it and/or modify
 ;;  it under the terms of the GNU General Public License as published
@@ -34,7 +34,7 @@ The code uses get-c.j(also in src/ here)"))
   (case (car type)
     ((:const :static :signed)
      (julia-type (cdr type)))
-    (:void  "Nothing")
+    (:void  "Void")
     (:ptr   "Ptr")
     (:char  "Uint8")
     (:short "Int16") (:int   "Int32") 
