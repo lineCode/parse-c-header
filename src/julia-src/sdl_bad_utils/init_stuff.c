@@ -33,9 +33,9 @@ SDL_Surface *surface;
 int videoFlags=0;
 
 // function to reset our viewport after a window resize.
-void resize_window( int width, int height )
+void resize_window(int w, int h)
 {
-  glViewport( 0, 0, ( GLsizei )width, ( GLsizei )height );
+  glViewport( 0, 0, (GLsizei)w, (GLsizei)h);
   glMatrixMode( GL_PROJECTION );
   glLoadIdentity();
   glMatrixMode( GL_MODELVIEW );
@@ -47,8 +47,8 @@ void resize_window( int width, int height )
 void init_gl()
 {
   // Set the background black.
-  glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
-  glDisable( GL_DEPTH_TEST );
+  glClearColor(0,0,0,0);
+  glDisable(GL_DEPTH_TEST);
 }
 
 int init_stuff(int screen_width,int screen_height)
@@ -63,9 +63,9 @@ int init_stuff(int screen_width,int screen_height)
     { fprintf( stderr, "Video query failed: %s\n", SDL_GetError() ); }
   // the flags to pass to SDL_SetVideoMode.
   videoFlags  = SDL_OPENGL          // Enable OpenGL in SDL.
-    | SDL_GL_DOUBLEBUFFER // Enable double buffering.
-    | SDL_HWPALETTE       // Store the palette in hardware.
-    | SDL_RESIZABLE;      // Enable window resizing.
+              | SDL_GL_DOUBLEBUFFER // Enable double buffering.
+              | SDL_HWPALETTE       // Store the palette in hardware.
+              | SDL_RESIZABLE;      // Enable window resizing.
 // Check stuff.
   if ( videoInfo->hw_available )
     videoFlags |= SDL_HWSURFACE;
@@ -88,7 +88,6 @@ int init_stuff(int screen_width,int screen_height)
 int finalize_draw ()
 {
   SDL_GL_SwapBuffers();
-  glClear( GL_COLOR_BUFFER_BIT );
+  glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
   glLoadIdentity(); 
-  //  reference_block();
 }

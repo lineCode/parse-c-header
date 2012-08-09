@@ -5,6 +5,7 @@
 #Probably best to stay similar to cl-opengl.
 
 #Overloading stuff
+#Vertices
 glvertex(i::Integer,j::Integer) = glvertex2i(i,j)
 glvertex(i::Integer,j::Integer,k::Integer) = glvertex3i(i,j,k)
 glvertex(i::Integer,j::Integer,k::Integer,l::Integer) = glvertex3i(i,j,k,l)
@@ -14,9 +15,18 @@ glvertex(x::Number,y::Number,z::Number) = glvertex3d(x,y,z)
 glvertex(x::Number,y::Number,z::Number,w::Number) = glvertex4d(x,y,z,w)
 
 #function glvertex(v::(Number,Number)) #Addition not defined on these either
-#  x,y = v
-#  glvertex(x,y)
-#end
+
+#Texture coordinates
+gltexcoord(i::Integer,j::Integer) = gltexcoord2i(i,j)
+gltexcoord(i::Integer,j::Integer,k::Integer) = gltexcoord3i(i,j,k)
+gltexcoord(i::Integer,j::Integer,k::Integer,l::Integer) = 
+    gltexcoord3i(i,j,k,l)
+
+gltexcoord(x::Number,y::Number) = gltexcoord2d(x,y)
+gltexcoord(x::Number,y::Number,z::Number) = gltexcoord3d(x,y,z)
+gltexcoord(x::Number,y::Number,z::Number,w::Number) = gltexcoord4d(x,y,z,w)
+
+
 function glvertex{T}(v::Array{T,1})
   if length(v)==3
     return glvertex(v[1],v[2],v[3])
@@ -50,6 +60,34 @@ glrotate(angle::Number, nx::Number,ny::Number,nz::Number) =
     glrotated(angle, nx,ny,nz)
 glrotate(angle::Number) = glrotated(angle, 0,0,1)
 
+#Enabling lists of stuff.
+function glenable(things::Vector)
+  for thing in things
+    glenable(thing)
+  end
+end
+glenable(things...) = glenable(things)
+#Disabling lists of stuff
+function gldisable(things::Vector)
+  for thing in things
+    gldisable(thing)
+  end
+end
+gldisable(things...) = gldisable(things)
+
+#Enable stuff, and disable after. 
+# NOTE: doesn't check if already enabled/disabled!
+macro with_enabled(things, body) #TODO wth doesnt it work?
+  ret, tv = gensym(2)
+  quote 
+    local $tv = $things #Don't execute `$things` twice
+    glenable($tv)
+    local $ret = $body
+    gldisable($tv)
+    return $ret
+  end
+end
+
 #The whole `begin` ... `end` structures are rather bad for the savings from the 
 # macros below.. 
 
@@ -58,19 +96,21 @@ glrotate(angle::Number) = glrotated(angle, 0,0,1)
 
 #Begin-end macro.
 macro with_primitive (primitive, code)
+  ret = gensym()
   quote glbegin($primitive)
-    ret = $code #remember what to return.
+    local $ret = $code #remember what to return.
     glend() 
-    ret #Note: in CL i'd use `prog1` to avoid the local variable.
+    $ret #Note: in CL i'd use `prog1` to avoid the local variable.
   end
 end
 #Pushing and popping matrix.
 macro with_pushed_matrix(code)
+  ret = gensym()
   quote
     glpushmatrix()
-    ret = $code
+    local $ret = $code
     glpopmatrix()
-    ret
+    $ret
   end
 end
 
@@ -81,27 +121,29 @@ function unit_frame()
   glscale(2)
 end
 
-#Project to the given range.
-function frame_to(fx::Number,fy::Number,tx::Number,ty::Number)
+#Map the given range to the unit range.
+function unit_frame_from(fx::Number,fy::Number,tx::Number,ty::Number)
   gltranslate(fx,fy)
   assert( fx!=tx && fy!=ty, "There might be a division by zero here.." )
   glscale(1/(tx-fx),1/(ty-fy))
 end
-frame_to(fr::Vector, to::Vector) = frame_to(fr[1],fr[2], to[1],to[2])
-function frame_to(range::(Number,Number,Number,Number))
+unit_frame_from(fr::Vector, to::Vector) = 
+    unit_frame_from(fr[1],fr[2], to[1],to[2])
+function unit_frame_from(range::(Number,Number,Number,Number))
   fx,fy,tx,ty = range
-  frame_to(fx,fy,tx,ty)
+  unit_frame_from(fx,fy,tx,ty)
 end
 
-#TODO frame_from?
-function frame_from(fx::Number,fy::Number,tx::Number,ty::Number)
+#Map the unit range to the given range.
+function unit_frame_to(fx::Number,fy::Number,tx::Number,ty::Number)
   gltranslate(fx,fy)
   glscale(tx-fx, ty-fy)
 end
-frame_from(fr::Vector, to::Vector) = frame_from(fr[1],fr[2], to[1],to[2])
-function frame_from(range::(Number,Number,Number,Number))
+unit_frame_to(fr::Vector, to::Vector) = 
+    unit_frame_to(fr[1],fr[2], to[1],to[2])
+function unit_frame_to(range::(Number,Number,Number,Number))
   fx,fy,tx,ty = range
-  frame_from(fx,fy,tx,ty)
+  unit_frame_to(fx,fy,tx,ty)
 end
 
 #Rectangle vertices (in QUADS, LINE_LOOP-able style)

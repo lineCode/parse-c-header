@@ -7,7 +7,9 @@ All the stuff in `autoffi/` is completely analogous to the C interface. Some
 extra stuff is added outside of that directory.
 
 ### Usage
-To use, edit `~/.juliarc.jl` and add 
+To use, first compile some stuff within with `make`(not all of them need it)
+
+Then edit `~/.juliarc.jl` and add 
 
     push(LOAD_PATH, "$(path_to_parse_c_header)/src/julia-src/")
 
@@ -29,8 +31,7 @@ I find `frame_to` and `frame_from` confusing and poorly named, so i will
 probably rename them at some point.
 
 ### SDL
-`bad_sdl_utils` also needs `compile.sh` to be run from it's directory.
-(TODO: makefile)
+`bad_sdl_utils` need `make` to be run from it's directory.
 
 Note that this currently does not at all use the autoffi stuff.
 
