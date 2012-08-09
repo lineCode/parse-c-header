@@ -13,6 +13,9 @@ Then edit `~/.juliarc.jl` and add
 
     push(LOAD_PATH, "$(path_to_parse_c_header)/src/julia-src/")
 
+Currently to use it, the `sdl_bad_utils` directory has to be in 
+`LD_LIBRARY_PATH` you may want to edit `run1.sh` to do it. It sucks, though.
+
 Then things can be loaded with paths originating from that. 
 
 ## Stuff reasonably usable:

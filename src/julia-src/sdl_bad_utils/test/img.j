@@ -10,22 +10,22 @@ load("gl_util.j")
 load("sdl_bad_utils/sdl_event.j")
 load("sdl_bad_utils/gl_sdl_load_img.j")
 
-function texies ()
+function texies() #TODO doesn't work, wrong ) or, ??
   @with_primitive GL_QUADS begin
-    gltexcoord(0.0,0.0)
-    glvertex(0,0)
-    gltexcoord(0.0,1.0)
-    glvertex(0,1)
-    gltexcoord(1.0,1.0)
-    glvertex(1,1)
-    gltexcoord(1.0,0.0)
-    glvertex(1,0)
+    gltexcoord(0.0, 0.0)
+    glvertex(0, 0)
+    gltexcoord(0.0, 1.0)
+    glvertex(0, 1)
+    gltexcoord(1.0, 1.0)
+    glvertex(1, 1)
+    gltexcoord(1.0, 0.0)
+    glvertex(1, 0)
   end
 end
 
 function run_this ()
   println("NOTE/TODO doesn't work if you run it from another directory.
- (unless an identically named file there)"
+ (unless an identically named file there")
   
   screen_width = 640
   screen_height = 640
@@ -39,7 +39,6 @@ function run_this ()
   glshademodel(GL_SMOOTH)
   
   img = gl_sdl_load_img("neverball_128.png") #xonotic.png", 512,512)
-  println(img)
 
   while true
     glcolor(1,1,1)
