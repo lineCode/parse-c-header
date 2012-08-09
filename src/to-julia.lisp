@@ -11,8 +11,8 @@
   (:use :common-lisp :alexandria :j-string-utils
 	:parse-c-header :external-program)
   (:export to-julia julia-type *string-conv*)
-  (:documentation "Makes julia source files that FFI C functions, based on a header.
-The code uses get-c.j(also in src/ here)"))
+  (:documentation "Makes julia source files that FFI C functions, based on a
+ header. The code uses get_c.j"))
 
 (in-package :to-julia)
 

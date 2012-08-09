@@ -8,6 +8,7 @@
 (in-package :run-julia)
 
 (defun not-type(type) ;TODO this is lazy..
+  (declare (ignore type))
   nil)
 
 (defun default-select (code &key (not-type #'not-type))
@@ -19,14 +20,13 @@
       (:struct  nil)
       (t        t))))
 
-;TODO absolute directory sucks...
 (defun ffi (&key include lib (lib-var lib)
-	    (src-dir "/home/jasper/proj/common-lisp/parse-c-header/src/run/")
+	    (project-dir (error "don't know project directory"))
 	    (where-file lib-var)
-	    (where (format nil "~a/../julia-src/autoffi/~a.j" 
-			   src-dir where-file))
+	    (where (format nil "~a/julia-src/autoffi/~a.j"
+			   project-dir where-file))
 	    (select #'default-select))
-  "FFI to julia (explore a bit with `:select #'print`)"
+  "FFI to julia (explore a bit with `:select #'print`"
   (with-open-file (stream (print where)
 			  :direction :output :if-exists :supersede 
 			  :if-does-not-exist :create)
@@ -39,9 +39,9 @@
 					:dlopen-lib lib-var :stream stream)))
 		  :defines-p t))))
 
-;TODO needed modifications. Figure out how to apply them..
-(defun ffi-gl()
+(defun ffi-gl (&key (project-dir (error "don't know project directory")))
   (ffi :include "GL/gl.h" :lib "libGL" :lib-var "gl"
+       :project-dir project-dir
        :select 
        (lambda (code)
 	 (unless (and (eql (car code) :define)
@@ -51,17 +51,22 @@
 			      "GLAPIENTRYP" "GLAPI")
 			    :test #'string=))
 	   (default-select code)))))
-(defun ffi-glu()
-  (ffi :include "GL/glu.h" :lib "libGLU" :lib-var "glu"))
-
-(defun ffi-sdl ()
+(defun ffi-glu (&key (project-dir (error "don't know project directory")))
+  (ffi :include "GL/glu.h" :lib "libGLU" :lib-var "glu" 
+       :project-dir project-dir))
+       
+(defun ffi-sdl (&key (project-dir (error "don't know project directory")))
   "TODO doesn't work."
-  (ffi :include "SDL/SDL.h" :lib "libSDL" :lib-var "sdl"))
+  (ffi :include "SDL/SDL.h" :lib "libSDL" :lib-var "sdl"
+       :project-dir project-dir))
 
-(defun ffi-acpi ()
+(defun ffi-acpi (&key (project-dir (error "don't know project directory")))
   "TODO unusably incomplete"
-  (ffi :include "libacpi.h" :lib "libacpi" :lib-var "acpi"))
+  (ffi :include "libacpi.h" :lib "libacpi" :lib-var "acpi"
+       :project-dir project-dir))
 
-;(ffi-acpi)
-;(ffi-gl)
-;(ffi-glu)
+;WARNING the path is absolute.
+;(let ((abs-path "/home/jasper/proj/common-lisp/parse-c-header"))
+;  (ffi-acpi :project-dir abs-path)
+;  (ffi-gl :project-dir abs-path)
+;  (ffi-glu :project-dir abs-path))
