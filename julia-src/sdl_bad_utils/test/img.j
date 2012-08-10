@@ -1,5 +1,6 @@
 
 #Just tests some gl drawing and showing where the cursor is as such.
+load("load_so.j")
 
 load("get_c.j")
 load("sdl_bad_utils/init_stuff.j")

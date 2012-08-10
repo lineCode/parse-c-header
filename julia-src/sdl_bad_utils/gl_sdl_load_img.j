@@ -1,5 +1,5 @@
 
-gl_sdl_load_img_lib = dlopen(find_in_path("sdl_bad_utils/gl_sdl_load_img.so"))
+gl_sdl_load_img_lib = load_so("sdl_bad_utils/gl_sdl_load_img.so")
 
 #Cant use @get_c_fun due to it not supporting String conversion yet.
 function gl_sdl_load_img(file::String, format::Integer, w::Integer,h::Integer)

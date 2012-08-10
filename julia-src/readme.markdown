@@ -16,6 +16,14 @@ Then edit `~/.juliarc.jl` and add (NOTE: it used to be `/src/julia-src/`)
 
 Then things can be loaded with paths originating from that.(hopefully)
 
+The following may be advisable at the end of `.juliarc.jl`:
+    
+    for path in LOAD_PATH
+	  size = filesize(path)
+      assert( size>0, "Seems like path in LOAD_PATH doesn't exist.
+size $size (using filesize as proxy. TODO find file_exists)")
+    end
+
 ## Stuff reasonably usable:
 
 ### Opengl

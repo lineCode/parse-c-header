@@ -1,7 +1,7 @@
 #  Jasper den Ouden 02-08-2012
 # Placed in public domain.
 
-draw_funs_lib = dlopen(find_in_path("sdl_bad_utils/sdl_event.so"))
+draw_funs_lib = load_so("sdl_bad_utils/sdl_event.so")
 
 @get_c_fun draw_funs_lib auto mouse_x()::Int32
 @get_c_fun draw_funs_lib auto mouse_y()::Int32
