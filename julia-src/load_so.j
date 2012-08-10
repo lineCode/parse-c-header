@@ -6,8 +6,8 @@ function find_so_file_path(so_file::String)
   try
     ret = find_in_path(so_file)
   catch
-    error(".so file seems missing, did you run make?
-File in question: $so_file\n\n")
+    error("\n.so file seems missing, did you run make?
+File in question: $so_file\n")
   end
   return ret
 end
