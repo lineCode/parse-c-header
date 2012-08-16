@@ -65,8 +65,13 @@
   (ffi :include "libacpi.h" :lib "libacpi" :lib-var "acpi"
        :project-dir project-dir))
 
+(defun ffi-cairo (&key (project-dir (error "don't know project directory")))
+  (ffi :include "cairo/cairo.h" :lib "libcairo" :lib-var "cairo"
+       :project-dir project-dir))
+
 ;WARNING the path is absolute.
-;(let ((abs-path "/home/jasper/proj/common-lisp/parse-c-header"))
+(let ((abs-path "/home/jasper/proj/common-lisp/parse-c-header"))
 ;  (ffi-acpi :project-dir abs-path)
 ;  (ffi-gl :project-dir abs-path)
-;  (ffi-glu :project-dir abs-path))
+;  (ffi-glu :project-dir abs-path)
+  (ffi-cairo :project-dir abs-path))

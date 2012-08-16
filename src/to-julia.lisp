@@ -47,7 +47,8 @@
      (case (cadr type) 
        (:char   "Uint8")    (:short "Uint16")
        (:int    "Uint32")   (:long  "Uint64")
-       (t      (error ""))))
+       (t      (if (cadr type) (error "unsigned what? ~a" type) 
+		               "Uint32"))))
     (t
      (car type))))
 

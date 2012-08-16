@@ -27,20 +27,22 @@ end
 function run_this ()
   screen_width = 640
   screen_height = 640
-  init_stuff()
+  init_stuff(screen_width,screen_height)
 
   mx(i) = -1 + 2*i/screen_width
-  my(j) =  1 - 2*j/screen_width
+  my(j) =  1 - 2*j/screen_height
   mx()  = mx(mouse_x())
   my()  = my(mouse_y())
-  glenable({GL_TEXTURE_2D, GL_BLEND})
-  glshademodel(GL_SMOOTH)
-  
-  img = gl_sdl_load_img(find_in_path("sdl_bad_utils/test/neverball_128.png"))
 
+
+  #img = gl_sdl_load_img(find_in_path("sdl_bad_utils/test/neverball_128.png"))
+  img = gl_sdl_load_img(find_in_path("sdl_bad_utils/test/600px-Vesta_from_Dawn,_July_17.jpg"))
+
+  println(img)
+#  gldisable(GL_TEXTURE_2D)
+#  gldisable(GL_BLEND)
   while true
     glcolor(1,1,1)
-    
 #Draws 'background'
     @with_primitive GL_TRIANGLES begin
       glvertex(-1,-1)
