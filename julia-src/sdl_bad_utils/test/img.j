@@ -25,6 +25,7 @@ function texies() #TODO doesn't work, wrong ) or, ??
 end
 
 function run_this ()
+  println("Got to start")
   screen_width = 640
   screen_height = 640
   init_stuff(screen_width,screen_height)
@@ -34,13 +35,13 @@ function run_this ()
   mx()  = mx(mouse_x())
   my()  = my(mouse_y())
 
+  println("Got to after SDL and GL init.")
 
-  #img = gl_sdl_load_img(find_in_path("sdl_bad_utils/test/neverball_128.png"))
-  img = gl_sdl_load_img(find_in_path("sdl_bad_utils/test/600px-Vesta_from_Dawn,_July_17.jpg"))
-
-  println(img)
+  img = gl_sdl_load_img(find_in_path("sdl_bad_utils/test/neverball_128.png"))
+  println("Got to loaded image, GL assigned index $img")
 #  gldisable(GL_TEXTURE_2D)
 #  gldisable(GL_BLEND)
+  run_n = 0
   while true
     glcolor(1,1,1)
 #Draws 'background'
@@ -64,6 +65,11 @@ function run_this ()
     
     finalize_draw()
     flush_events()
+
+    run_n+=1
+    if run_n==1 || run_n==10
+      println("Got to run $run_n times")
+    end
   end
 end
 

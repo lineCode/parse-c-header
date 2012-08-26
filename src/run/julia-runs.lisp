@@ -53,7 +53,11 @@
 	   (default-select code)))))
 (defun ffi-glu (&key (project-dir (error "don't know project directory")))
   (ffi :include "GL/glu.h" :lib "libGLU" :lib-var "glu" 
-       :project-dir project-dir))
+       :project-dir project-dir
+       :select
+       (lambda (code)
+	 (and (not (and (eql (car code) :typedef) (string= (cadr code) "GLUnurbs")))
+	      (default-select code)))))
        
 (defun ffi-sdl (&key (project-dir (error "don't know project directory")))
   "TODO doesn't work."
@@ -69,9 +73,14 @@
   (ffi :include "cairo/cairo.h" :lib "libcairo" :lib-var "cairo"
        :project-dir project-dir))
 
+(defun ffi-sdl_image(&key (project-dir (error "don't know project directory")))
+  (ffi :include "SDL/SDL_image.h" :lib "libSDL_image" :lib-var "sdl_image"
+       :project-dir project-dir))
+
 ;WARNING the path is absolute.
 (let ((abs-path "/home/jasper/proj/common-lisp/parse-c-header"))
+;  (ffi-sdl_image :project-dir abs-path))
 ;  (ffi-acpi :project-dir abs-path)
 ;  (ffi-gl :project-dir abs-path)
-;  (ffi-glu :project-dir abs-path)
-  (ffi-cairo :project-dir abs-path))
+  (ffi-glu :project-dir abs-path)) ;Hmm misrecognize pointer.
+;  (ffi-cairo :project-dir abs-path))

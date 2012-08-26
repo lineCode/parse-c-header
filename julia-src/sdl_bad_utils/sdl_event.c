@@ -112,6 +112,14 @@ int poll_event()
         case SDL_KEYUP:
 	  return -key_index(event.key.keysym.sym);
           break;
+	case SDL_QUIT:
+	  return 1100;
+	case SDL_VIDEORESIZE:
+	  return 1101;
+	case SDL_VIDEOEXPOSE:
+	  return 1102;
+	case SDL_SYSWMEVENT:
+	  return 1103;
 	default: //NOTE: just mousedown atm.
 	  return _ID_FAILED;
 	}

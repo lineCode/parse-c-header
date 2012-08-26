@@ -1,8 +1,12 @@
-all: init_stuff.so sdl_event.so gl_sdl_load_img.so
-default: all
+compile: init_stuff.so sdl_event.so gl_sdl_load_img.so
+default: compile
 
 clean:
 	rm -f init_stuff.so sdl_event.so gl_sdl_load_img.so
+
+test:
+	cd test\
+	make test;
 
 init_stuff.so: init_stuff.c
 	gcc -shared init_stuff.c -fPIC \

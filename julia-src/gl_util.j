@@ -4,6 +4,31 @@
 #Handy stuff to make use of Julia features.
 #Probably best to stay similar to cl-opengl.
 
+macro also_tuple(of, to)
+  nT(n) = map((i->(:T)), 1:n)
+  function getwhich(given::Expr)
+    if to.head == symbol(":")
+      return to.args[1]:to.args[2]
+    end
+    if to.head == :tuple
+      return to.args
+    end
+    error("Invalid specification of the lengths of tuples: $to
+Should be a tuple or range.") #TODO this could be better.
+  end
+  ret = {}
+  getwhich(given::Integer) = {given}
+  for n = getwhich(to)
+    push(ret, Expr(:function,
+                   {Expr(:call, {Expr(:curly, {of,:T}, Any),
+                                 Expr(symbol("::"),
+                                      {:x,Expr(:tuple,nT(n),Any)},Any)},Any),
+                    Expr(:call,cat(1,{of},map((i)->:(x[$i]), 1:n)), Any)},
+                   Any))
+  end
+  return esc(Expr(:block,ret, Any))
+end
+
 #Overloading stuff
 #Vertices
 glvertex(i::Integer,j::Integer) = glvertex2i(i,j)
@@ -14,18 +39,7 @@ glvertex(x::Number,y::Number) = glvertex2d(x,y)
 glvertex(x::Number,y::Number,z::Number) = glvertex3d(x,y,z)
 glvertex(x::Number,y::Number,z::Number,w::Number) = glvertex4d(x,y,z,w)
 
-#function glvertex(v::(Number,Number)) #Addition not defined on these either
-
-#Texture coordinates
-gltexcoord(i::Integer,j::Integer) = gltexcoord2i(i,j)
-gltexcoord(i::Integer,j::Integer,k::Integer) = gltexcoord3i(i,j,k)
-gltexcoord(i::Integer,j::Integer,k::Integer,l::Integer) = 
-    gltexcoord3i(i,j,k,l)
-
-gltexcoord(x::Number,y::Number) = gltexcoord2d(x,y)
-gltexcoord(x::Number,y::Number,z::Number) = gltexcoord3d(x,y,z)
-gltexcoord(x::Number,y::Number,z::Number,w::Number) = gltexcoord4d(x,y,z,w)
-
+@also_tuple glvertex 2:4
 
 function glvertex{T}(v::Array{T,1})
   if length(v)==3
@@ -39,26 +53,49 @@ function glvertex{T}(v::Array{T,1})
   end
 end
 
+#Texture coordinates
+gltexcoord(i::Integer,j::Integer) = gltexcoord2i(i,j)
+gltexcoord(i::Integer,j::Integer,k::Integer) = gltexcoord3i(i,j,k)
+gltexcoord(i::Integer,j::Integer,k::Integer,l::Integer) = 
+    gltexcoord3i(i,j,k,l)
+
+gltexcoord(x::Number,y::Number) = gltexcoord2d(x,y)
+gltexcoord(x::Number,y::Number,z::Number) = gltexcoord3d(x,y,z)
+gltexcoord(x::Number,y::Number,z::Number,w::Number) = gltexcoord4d(x,y,z,w)
+@also_tuple gltexcoord 2:4
+
 glnormal(x::Number,y::Number,z::Number) = glnormal3d(x,y,z)
 #glnormal(i::Integer,j::Integer,k::Integer) = glnormal3b(i,j,k)
+@also_tuple glnormal 2:4
 
 glcolor(r::Number,g::Number,b::Number) = glcolor3f(r,g,b)
 glcolor(r::Number,g::Number,b::Number,a::Number) = glcolor4f(r,g,b,a)
+@also_tuple glcolor 3:4
 
 glcolorb(r::Integer,g::Integer,b::Integer) = glcolor3b(r,g,b)
 glcolorb(r::Integer,g::Integer,b::Integer,a::Integer) = glcolor4b(r,g,b,a)
+@also_tuple glcolorb 3:4
 
 glscale(x::Number,y::Number,z::Number) = glscaled(x,y,z)
 glscale(x::Number,y::Number) = glscaled(x,y,1)
 glscale(s::Number) = glscaled(s,s,s)
+@also_tuple glscale 1:3
 
 gltranslate(x::Number,y::Number,z::Number) = gltranslated(x,y,z)
-
-glscale(x::Number,y::Number) = glscaled(x,y,1)
 gltranslate(x::Number,y::Number) = gltranslated(x,y,0)
+@also_tuple gltranslate 2:3
+
 glrotate(angle::Number, nx::Number,ny::Number,nz::Number) =
     glrotated(angle, nx,ny,nz)
-glrotate(angle::Number) = glrotated(angle, 0,0,1)
+glrotate(angle::Number) = glrotated(angle,0,0,1)
+glrotate(angle::Number, n::(Number,Number,Number)) =
+    glrotate(angle, n[1],n[2],n[3])
+#Damn degrees.
+glrotate_r(angle::Number) = glrotate(angle*180/pi)
+glrotate_r(angle::Number, nx::Number,ny::Number,nz::Number) = 
+    glrotate(angle*180/pi, nx,ny,nz)
+glrotate_r(angle::Number, n::(Number,Number,Number)) = 
+    glrotate(angle*180/pi, n)
 
 #Enabling lists of stuff.
 function glenable(things::Vector)
@@ -127,24 +164,21 @@ function unit_frame_from(fx::Number,fy::Number,tx::Number,ty::Number)
   assert( fx!=tx && fy!=ty, "There might be a division by zero here.." )
   glscale(1/(tx-fx),1/(ty-fy))
 end
-unit_frame_from(fr::Vector, to::Vector) = 
+
+typealias Vector2 Union((Number,Number),Vector) #(just for here)
+
+unit_frame_from(fr::Vector2, to::Vector2) =
     unit_frame_from(fr[1],fr[2], to[1],to[2])
-function unit_frame_from(range::(Number,Number,Number,Number))
-  fx,fy,tx,ty = range
-  unit_frame_from(fx,fy,tx,ty)
-end
+@also_tuple unit_frame_from 2,4
 
 #Map the unit range to the given range.
 function unit_frame_to(fx::Number,fy::Number,tx::Number,ty::Number)
   gltranslate(fx,fy)
   glscale(tx-fx, ty-fy)
 end
-unit_frame_to(fr::Vector, to::Vector) = 
+unit_frame_to(fr::Vector2, to::Vector2) = 
     unit_frame_to(fr[1],fr[2], to[1],to[2])
-function unit_frame_to(range::(Number,Number,Number,Number))
-  fx,fy,tx,ty = range
-  unit_frame_to(fx,fy,tx,ty)
-end
+@also_tuple unit_frame_from 2,4
 
 #Rectangle vertices (in QUADS, LINE_LOOP-able style)
 function rect_vertices(fx::Number,fy::Number,tx::Number,ty::Number)
@@ -153,15 +187,14 @@ function rect_vertices(fx::Number,fy::Number,tx::Number,ty::Number)
   glvertex(tx,ty)
   glvertex(tx,fy)
 end
-function rect_vertices(range::(Number,Number,Number,Number))
-  fx,fy,tx,ty = range
-  rect_vertices(fx,fy,tx,ty)
-end
-rect_vertices(fr::Vector, to::Vector) = 
+rect_vertices(fr::Vector2, to::Vector2) = 
     rect_vertices(fr[1],fr[2], to[1],to[2])
+@also_tuple rect_vertices 2,4
 
 vertices_rect_around(x::Number,y::Number, r::Number) = 
     rect_vertices(x-r,y-r, x+r, y+r)
 
-vertices_rect_around(pos::Vector, r::Number) = 
+vertices_rect_around(pos::Vector2, r::Number) = 
    vertices_rect_around(pos[1],pos[2],r)
+
+@also_tuple vertices_rect_around 2:3

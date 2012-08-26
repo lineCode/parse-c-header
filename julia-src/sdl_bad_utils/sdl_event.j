@@ -7,10 +7,18 @@ draw_funs_lib = load_so("sdl_bad_utils/sdl_event.so")
 @get_c_fun draw_funs_lib auto mouse_y()::Int32
 @get_c_fun draw_funs_lib auto poll_event()::Int32
 
-function flush_events()
-  while poll_event() != SDL_EVENTS_DONE
+function flush_events(quit_exit::Bool)
+  while true
+    pol = poll_event()
+    if pol == SDL_EVENTS_DONE
+      return
+    end
+    if pol == SDL_QUIT && quit_exit
+      exit()
+    end
   end
 end
+flush_events() = flush_events(true)
 
 #@get_c_fun_list draw_funs_lib begin
 #  mouse_x()::Int32
@@ -90,5 +98,10 @@ const SDLK_BREAK = 1088
 const SDLK_MENU = 1089
 const SDLK_POWER = 1090
 const SDLK_EURO = 1091
+
+const SDL_QUIT = 1100
+const SDL_VIDEORESIZE = 1101
+const SDL_VIDEOEXPOSE = 1102
+const SDL_SYSWMEVENT = 1103
 
 const SDL_EVENTS_DONE = 0

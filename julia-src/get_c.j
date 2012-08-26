@@ -42,14 +42,17 @@ macro get_c_fun (dlopen_lib, to_name, from_fun)
   return_type = from_fun.args[2]
   input_types = map(function (arg) arg.args[2] end, arguments)
 # Construct the result.
+  body = quote 
+    $(Expr(:ccall, 
+           cat(1, {:(dlsym($dlopen_lib, #Really needs to be a quote.
+                           $(Expr(:quote,{c_name},Any)))), 
+                   return_type, Expr(:tuple,input_types,Any)},
+               argument_names), Any))
+  end
   ret= Expr(:function,
-              {Expr(:call, cat(1,{to_name},argument_names),Any),
-               Expr(:ccall, 
-                    cat(1, {:(dlsym($dlopen_lib, #Really needs to be a quote.
-                                    $(Expr(:quote,{c_name},Any)))), 
-                            return_type, Expr(:tuple,input_types,Any)},
-                        argument_names), Any)}, Any)
-  return ret
+            {Expr(:call, cat(1,{to_name},argument_names),Any), body},
+            Any)
+  return esc(ret)
 end
 
 #TODO magic gensym replacing dlopen_lib... how..
