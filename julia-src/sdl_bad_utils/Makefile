@@ -4,8 +4,11 @@ default: compile
 clean:
 	rm -f init_stuff.so sdl_event.so gl_sdl_load_img.so
 
-test:
-	cd test\
+#Auch weakness.
+gnarly-non-existant-file:
+	echo ''
+test: gnarly-non-existant-file
+	cd test;\
 	make test;
 
 init_stuff.so: init_stuff.c

@@ -1,6 +1,6 @@
 all: default
 default: sdl_bad_utils
-test_all: sdl_bad_utils_test
+test_all: test_sdl_bad_utils
 
 sdl_bad_utils:
 	cd julia-src/sdl_bad_utils/;\

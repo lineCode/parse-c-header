@@ -5,26 +5,33 @@
 #Probably best to stay similar to cl-opengl.
 
 macro also_tuple(of, to)
-  nT(n) = map((i->(:T)), 1:n)
   function getwhich(given::Expr)
-    if to.head == symbol(":")
-      return to.args[1]:to.args[2]
+    if given.head == symbol(":")
+      assert( length(given.args) <=2 )
+      return given.args[1]:given.args[2]
     end
-    if to.head == :tuple
-      return to.args
+    if given.head == :tuple
+      return given.args
     end
     error("Invalid specification of the lengths of tuples: $to
 Should be a tuple or range.") #TODO this could be better.
   end
-  ret = {}
   getwhich(given::Integer) = {given}
+  ret = {}
+#  nT(n) = map((i->(:T)), 1:n)
   for n = getwhich(to)
-    push(ret, Expr(:function,
-                   {Expr(:call, {Expr(:curly, {of,:T}, Any),
-                                 Expr(symbol("::"),
-                                      {:x,Expr(:tuple,nT(n),Any)},Any)},Any),
-                    Expr(:call,cat(1,{of},map((i)->:(x[$i]), 1:n)), Any)},
-                   Any))
+    push(ret, 
+         Expr(:function,
+#TODO templated it earlier, but unequal argument types make that not work.
+#                   {Expr(:call, {Expr(:curly, {of,:T}, Any),
+#                                 Expr(symbol("::"),
+#                                      {:x,Expr(:tuple,nT(n),Any)},Any)},Any),
+              {Expr(:call, 
+                    {of, Expr(symbol("::"),
+                              {:x,Expr(:tuple, map(i->(:Any), 1:n), Any)},
+                              Any)},Any),
+               Expr(:call,cat(1,{of},map((i)->:(x[$i]), 1:n)), Any)},
+              Any))
   end
   return esc(Expr(:block,ret, Any))
 end
