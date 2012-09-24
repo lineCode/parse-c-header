@@ -3,6 +3,8 @@
 
 load("load_so.j")
 
+load("util/util.j")
+
 load("get_c.j")
 load("sdl_bad_utils/init_stuff.j")
 
@@ -23,7 +25,7 @@ function run_this ()
 
   while true
     glcolor(1.0,1.0,1.0)
-    @with_primitive GL_TRIANGLES begin
+    @with glprimitive(GL_TRIANGLES) begin
       glvertex(-1,-1)
       glvertex(-1,1)
       glvertex(1,0)

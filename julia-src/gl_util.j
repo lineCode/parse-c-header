@@ -4,6 +4,7 @@
 #Handy stuff to make use of Julia features.
 #Probably best to stay similar to cl-opengl.
 
+#Macro to conveniently also support tupled arguments.(TODO probably move elsewhere)
 macro also_tuple(of, to)
   function getwhich(given::Expr)
     if given.head == symbol(":")
@@ -105,10 +106,15 @@ glrotate_r(angle::Number, n::(Number,Number,Number)) =
     glrotate(angle*180/pi, n)
 
 #Enabling lists of stuff.
+type _GlEnable
+  things::Vector
+end
+
 function glenable(things::Vector)
   for thing in things
     glenable(thing)
   end
+  return _GlEnable(things)
 end
 glenable(things...) = glenable(things)
 #Disabling lists of stuff
@@ -119,18 +125,7 @@ function gldisable(things::Vector)
 end
 gldisable(things...) = gldisable(things)
 
-#Enable stuff, and disable after. 
-# NOTE: doesn't check if already enabled/disabled!
-macro with_enabled(things, body) #TODO wth doesnt it work?
-  ret, tv = gensym(2)
-  quote 
-    local $tv = $things #Don't execute `$things` twice
-    glenable($tv)
-    local $ret = $body
-    gldisable($tv)
-    return $ret
-  end
-end
+no_longer_with(enabled::_GlEnable) = gldisable(enabled.things) #!
 
 #The whole `begin` ... `end` structures are rather bad for the savings from the 
 # macros below.. 
@@ -138,25 +133,24 @@ end
 #NOTE: if you `return` or something in the middle it won't end of course!
 # (no `cl:unwind-protect`)
 
-#Begin-end macro.
-macro with_primitive (primitive, code)
-  ret = gensym()
-  quote glbegin($primitive)
-    local $ret = $code #remember what to return.
-    glend() 
-    $ret #Note: in CL i'd use `prog1` to avoid the local variable.
-  end
+#glbegin for use _with_ @with
+#TODO will want to upgrade that so glbegin can be used directly.
+type _GlPrimitive
 end
-#Pushing and popping matrix.
-macro with_pushed_matrix(code)
-  ret = gensym()
-  quote
-    glpushmatrix()
-    local $ret = $code
-    glpopmatrix()
-    $ret
-  end
+function glprimitive(primitive)
+  glbegin(primitive)
+  return _GlPrimitive()
 end
+no_longer_with(p::_GlPrimitive) = glend() #!
+
+type _GlPushed
+end
+#glpushmatrix for with @with #TODO will want upgrade.
+function glpushed() 
+  glpushmatrix()
+  return _GlPushed()
+end
+no_longer_with(p::_GlPushed) = glpopmatrix() #!
 
 #More functions
 function unit_frame()
@@ -164,12 +158,11 @@ function unit_frame()
   gltranslate(-1,-1)
   glscale(2)
 end
-
 #Map the given range to the unit range.
 function unit_frame_from(fx::Number,fy::Number,tx::Number,ty::Number)
-  gltranslate(fx,fy)
   assert( fx!=tx && fy!=ty, "There might be a division by zero here.." )
   glscale(1/(tx-fx),1/(ty-fy))
+  gltranslate(-fx,-fy)
 end
 
 typealias Vector2 Union((Number,Number),Vector) #(just for here)

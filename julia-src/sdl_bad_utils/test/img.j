@@ -1,6 +1,7 @@
 
 #Just tests some gl drawing and showing where the cursor is as such.
 load("load_so.j")
+load("util/util.j")
 
 load("get_c.j")
 load("sdl_bad_utils/init_stuff.j")
@@ -12,7 +13,7 @@ load("sdl_bad_utils/sdl_event.j")
 load("sdl_bad_utils/gl_sdl_load_img.j")
 
 function texies() #TODO doesn't work, wrong ) or, ??
-  @with_primitive GL_QUADS begin
+  @with glprimitive(GL_QUADS) begin
     gltexcoord(0.0, 0.0)
     glvertex(0, 0)
     gltexcoord(0.0, 1.0)
@@ -45,14 +46,14 @@ function run_this ()
   while true
     glcolor(1,1,1)
 #Draws 'background'
-    @with_primitive GL_TRIANGLES begin
+    @with glprimitive(GL_TRIANGLES) begin
       glvertex(-1,-1)
       glvertex(-1,1)
       glvertex(1,0)
     end
 #Draws cursor.
     glcolor(1,0,0)
-    @with_primitive GL_TRIANGLES begin
+    @with glprimitive(GL_TRIANGLES) begin
       glvertex(mx(),my())
       glvertex(mx()+0.1,my())
       glvertex(mx(),my()+0.1)
