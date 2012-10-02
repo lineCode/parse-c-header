@@ -8,7 +8,7 @@
 #
 
 load("util/util.j")
-load("parse/c-header.j")
+load("parse/c-header.jl")
 
 #Generates randomly whitespaced and commented stuff.
 function generate_for_line_handle(crud_len, x)
@@ -38,11 +38,10 @@ end
 #Tests the line handle using generated crud.
 function test_line_handle(crud_len)
   x = rand()
-  @with stream = generate_for_line_handle(crud_len,x) begin
-    got = line_handle("",stream) #Hopefully skips crud.
-    y_str = (!isempty(got) ? got : readline(stream))
-    i,j = search(y_str, [' ', '\n', '\t', '#','\n','/'])
-    y = parse_float(y_str[1:i-1])
+  @with stream = ConvenientStream(generate_for_line_handle(crud_len,x)) begin
+    line_handle(stream) #Hopefully skips crud.
+    i,j = search(stream.line, [' ', '\n', '\t', '#','\n','/'])
+    y = parse_float(stream.line[1:i-1])
     if x!=y
       println("$x != $y")
     end
