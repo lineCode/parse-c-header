@@ -8,7 +8,7 @@
 #
 
 load("util/util.j")
-load("parse/c-header.jl")
+load("parse/c_header.jl")
 
 #Generates randomly whitespaced and commented stuff.
 function generate_for_skip_white(crud_len, x)

@@ -1,13 +1,11 @@
 #
-#  Copyright (C) 01-10-2012 Jasper den Ouden.
+#  Copyright (C) 02-10-2012 Jasper den Ouden.
 #
 #  This is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published
 #  by the Free Software Foundation, either version 3 of the License, or
 #  (at your option) any later version.
 #
-
-#TODO start trying things starting with the types,
 
 #Makes a stream with a string.
 function stream_from_string(string::String)
@@ -130,7 +128,7 @@ end
 toklist_to_type_arg(toklist) =
     TokVar(symbol(last(toklist)), TokType(butlast(toklist)))
 
-#Tokenizes for C. 
+#Tokenizes for C.
 function tokenize_for_c(in::ConvenientStream, what)
   list = {}
   args_list = {}
@@ -203,6 +201,7 @@ function parse_struct(in::ConvenientStream)
     push(list, tokenize_for_c(in, :struct))
     skip_white(in)
   end
+  forward(in,1) #Get over the '}'
   return TokStruct(:ignore, list)
 end
 function parse_union(in::ConvenientStream) #TODO
