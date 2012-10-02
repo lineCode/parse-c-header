@@ -11,7 +11,7 @@ load("util/util.j")
 load("parse/c-header.jl")
 
 #Generates randomly whitespaced and commented stuff.
-function generate_for_line_handle(crud_len, x)
+function generate_for_skip_white(crud_len, x)
   stream = memio()
   function gen_crud()
     @case randi(8) begin
@@ -36,10 +36,10 @@ function generate_for_line_handle(crud_len, x)
   return stream
 end
 #Tests the line handle using generated crud.
-function test_line_handle(crud_len)
+function test_skip_white(crud_len)
   x = rand()
-  @with stream = ConvenientStream(generate_for_line_handle(crud_len,x)) begin
-    line_handle(stream) #Hopefully skips crud.
+  @with stream = ConvenientStream(generate_for_skip_white(crud_len,x)) begin
+    skip_white(stream) #Hopefully skips crud.
     i,j = search(stream.line, [' ', '\n', '\t', '#','\n','/'])
     y = parse_float(stream.line[1:i-1])
     if x!=y
@@ -49,5 +49,5 @@ function test_line_handle(crud_len)
 end
 
 for n = 1:100
-  test_line_handle(10)
+  test_skip_white(10)
 end

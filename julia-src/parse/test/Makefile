@@ -1,6 +1,6 @@
 default: test_stuff
 
-test_stuff: line_handle
+test_stuff: skip_white
 
-line_handle:
-	sh test.sh line_handle
+skip_white:
+	sh test.sh skip_white

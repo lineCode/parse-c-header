@@ -76,7 +76,7 @@ function get_to_line_with{W}(in::ConvenientStream, with::W)
   end
 end
 #Skips comments, whitespace. TODO rename to skip_white or such
-function line_handle(in::ConvenientStream)
+function skip_white(in::ConvenientStream)
   next_up(str) = begins_with(in.line, str)
   while true
     if isempty(in.line) || contains(" \t\n", in.line[1]) #Skip whitespace.
@@ -136,7 +136,7 @@ function tokenize_for_c(in::ConvenientStream, what)
   args_list = {}
   j = 1
   while true #TODO start instead by parsing a type.
-    line_handle(in)
+    skip_white(in)
 
     function forw()
       forward(in,j)
@@ -157,10 +157,10 @@ function tokenize_for_c(in::ConvenientStream, what)
    
     if j>length(in.line) || next_up(' ', '\t', '/') #Whitespace.
       push_cur()
-      line_handle(in)
+      skip_white(in)
     elseif next_up('(')
       push_cur()
-      line_handle(in)
+      skip_white(in)
       if in.line[1]=='*'
         error("Function types not yet supported.")
       end
@@ -173,7 +173,7 @@ function tokenize_for_c(in::ConvenientStream, what)
       if !isempty(list) #TODO enforce no `,/*nothing*/)`
         push(args_list, toklist_to_type_arg(list))
       end
-      line_handle(in)
+      skip_white(in)
       assert( in.line[1]==';' ) #Must be ';'-separated. # TODO { for more.
       return args_list
     elseif next_up('{')
@@ -198,21 +198,21 @@ end
 
 function parse_struct(in::ConvenientStream)
   list = {}
-  line_handle(in)
+  skip_white(in)
   while in.line[1]!='}'
     push(list, tokenize_for_c(in, :struct))
-    line_handle(in)
+    skip_white(in)
   end
   return TokStruct(:ignore, list)
 end
 function parse_union(in::ConvenientStream) #TODO
   list = {}
-  line_handle(in)
+  skip_white(in)
   #TODO allow , ; and  = to define shit.
 end
 
 function parse_toplevel_1(in::ConvenientStream)
-  line_handle(in)
+  skip_white(in)
   if begins_with(in.line, "typedef")
     forward(in, 7)
     push(list, TokTypeDef(tokenize_for_c(in, :typedef)))
