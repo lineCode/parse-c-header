@@ -7,16 +7,9 @@
 #  (at your option) any later version.
 #
 
-#Makes a stream with a string.
-function stream_from_string(string::String)
-  s = memio(length(string))
-  write(s, string)
-  seek(s,0) #Need to seek to start.
-  return s
-end
-string_from_stream() = memio() #Which is a IOStream, which has a (todo name it
+# Parses preprocessed C header files (perhaps upgrade to C)
 
-type ConvenientStream
+type ConvenientStream #TODO not quite the right place to put this file.
   stream::IOStream
   line::String
 end
@@ -34,31 +27,6 @@ function forward(cs::ConvenientStream, n::Integer)
   return nothing
 end
 readline(cs::ConvenientStream) = (cs.line = readline(cs.stream)) #!
-
-#function tokenize(input::IOStream, white::String, stop::String,
-function c_header_parse(in::IOStream)
-#Could try not pre-tokenizing again.. ?
-#global:
-#  typedef name type (attach type to name)
-#  #.. (ignore)
-#type|global:
-#  struct [name] { ...struct_body... };
-#variables
-#  starts with type, then list of possibly pre-set variables.
-#function
-#  type name(args){ ...body... }
-#args
-#  
-#body:
-#  variables|expressions
-#expressions:
-#  
-#struct_body:
-#  body but no setting and no functions.
-#comments
-#  //
-#  /*enclosed*/
-end
 
 #Skip to the line containing the given object sequence.
 function get_to_line_with{W}(in::ConvenientStream, with::W)
@@ -121,7 +89,7 @@ type TokType
 end
 
 type TokTypedef
-  val
+  val::TokVar
 end
 #TODO query the type for stuff.
 
@@ -155,7 +123,6 @@ function tokenize_for_c(in::ConvenientStream, what)
    
     if j>length(in.line) || next_up(' ', '\t', '/') #Whitespace.
       push_cur()
-      skip_white(in)
     elseif next_up('(')
       push_cur()
       skip_white(in)
@@ -182,6 +149,11 @@ function tokenize_for_c(in::ConvenientStream, what)
       push_cur()
       push(args_list, toklist_to_type_arg(list))
       list = {}
+    elseif next_up('*')
+      assert( what== :funargs )
+      push_cur()
+      push(list, :ptr)
+      forward(in,1)
     elseif next_up(';')
       push_cur()
       assert( what!=:funargs ) #Arguments ended too early.
